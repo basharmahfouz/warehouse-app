@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { ShoppingCart, TrendingUp, HandCoins, Wallet, Clock, User, UserGroup } from 'lucide-react'
+import { ShoppingCart, TrendingUp, HandCoins, Wallet, Clock, User, Users } from 'lucide-react'
 
 type UnifiedTransaction = {
   id: string
