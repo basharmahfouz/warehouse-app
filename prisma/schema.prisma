@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id               Int                @id @default(autoincrement())
+  name             String             @unique
+  pricePerKg       Float              @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  supplierInvoices SupplierInvoice[]
+  saleInvoiceItems SaleInvoiceItem[]
+}
+
+model Supplier {
+  id        Int                @id @default(autoincrement())
+  name      String             @unique
+  phone     String?
+  notes     String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  invoices  SupplierInvoice[]
+  payments  SupplierPayment[]
+}
+
+model SupplierInvoice {
+  id          Int      @id @default(autoincrement())
+  supplierId  Int
+  categoryId  Int
+  bales       Int
+  kg          Float
+  pricePerKg  Float
+  totalAmount Float
+  date        DateTime @default(now())
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+  category    Category @relation(fields: [categoryId], references: [id])
+}
+
+model SupplierPayment {
+  id         Int       @id @default(autoincrement())
+  supplierId Int
+  amount     Float
+  dueDate    DateTime?
+  paidDate   DateTime?
+  isPaid     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  supplier   Supplier  @relation(fields: [supplierId], references: [id])
+}
+
+model Customer {
+  id        Int               @id @default(autoincrement())
+  name      String            @unique
+  phone     String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  invoices  SaleInvoice[]
+  payments  CustomerPayment[]
+}
+
+model SaleInvoice {
+  id          Int               @id @default(autoincrement())
+  customerId  Int
+  date        DateTime          @default(now())
+  totalAmount Float             @default(0)
+  customer    Customer          @relation(fields: [customerId], references: [id])
+  items       SaleInvoiceItem[]
+}
+
+model SaleInvoiceItem {
+  id               Int         @id @default(autoincrement())
+  invoiceId        Int
+  categoryId       Int
+  bales            Int
+  kg               Float
+  pricePerKgAtSale Float       // Sells price locked at the time of sale
+  totalAmount      Float
+  invoice          SaleInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  category         Category    @relation(fields: [categoryId], references: [id])
+}
+
+model CustomerPayment {
+  id         Int       @id @default(autoincrement())
+  customerId Int
+  amount     Float
+  dueDate    DateTime?
+  paidDate   DateTime?
+  isPaid     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  customer   Customer  @relation(fields: [customerId], references: [id])
+}
